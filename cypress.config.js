@@ -1,6 +1,6 @@
 const { defineConfig } = require('Cypress');
 const { allureCypress } = require('allure-cypress/reporter');
-//const allureWriter = require('@shelex/cypress-allure-plugin/writer');
+const allureWriter = require('@shelex/cypress-allure-plugin/writer');
 
 module.exports = defineConfig({
   e2e: {

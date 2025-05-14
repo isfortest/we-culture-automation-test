@@ -15,7 +15,7 @@
 
 // Import commands.js using ES2015 syntax:
 import "allure-cypress";
-//import '@shelex/cypress-allure-plugin';
+import '@shelex/cypress-allure-plugin';
 import './commands'
 import 'cypress-plugin-stripe-elements';
 Cypress.on('uncaught:exception', (err, runnable) => {
