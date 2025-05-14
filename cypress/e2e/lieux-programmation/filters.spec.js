@@ -1,10 +1,10 @@
-/// <reference types="Cypress" />
+/// <reference types="cypress" />
 import LieuxProgrammationPage from '/cypress/page-objects/lieuxProgrammationPage';
 
 describe('Lieux de Programmation - Filters Tests', () => {
   beforeEach(() => {
     // Intercepter la requête API qui charge les données des lieux
-    cy.intercept('GET', '**lieux/lieu%20de%20programmation*').as('getLieux');
+    cy.intercept('GET', '**lieux/lieux%20de%20programmation*').as('getLieux');
     
     LieuxProgrammationPage.navigate();
     cy.wait('@getLieux');

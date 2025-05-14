@@ -1,7 +1,7 @@
 class LieuxProgrammationPage {
     // Navigation
     navigate() {
-      cy.visit('/lieux/lieu%20de%20programmation');
+      cy.visit('/lieux/lieux%20de%20programmation');
     }
   
     // Page elements
