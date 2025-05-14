@@ -1,0 +1,19 @@
+{
+  "date": {
+    "day": "15",
+    "month": "MAI",
+    "year": "2026"
+  },
+  "oldAddress": "123 Rue Saint-Honoré 75001 Paris",
+  "newAddress": "157 Boulevard Macdonald 75019 Paris",
+  "offer": "12 mois",
+  "emailDomain": "-ilyas.soufiane96-test@papernest.com",
+  "phone": "634055136",
+  "firstName": "Ilyas",
+  "lastName": "SOUFIANE",
+  "message": "Est-ce que tout est bon",
+  "activation": "bureau de Poste",
+  "cardNumber": 4263982640269299,
+  "cardExpiry": "0628",
+  "cardCVC": "837"
+}

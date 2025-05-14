@@ -1,0 +1,27 @@
+{
+  "validPlaque": {
+    "name": "CORSE",
+    "abbreviation": "COR",
+    "address": "12 rue Corse",
+    "postalCode": "20000",
+    "city": "Ajaccio",
+    "contact": {
+      "function": "Chef de service",
+      "name": "Edouard Legrand",
+      "validPhone": "0677536244",
+      "validEmail": "edouard.legrand@test.com",
+      "invalidPhone": "062193979", 
+      "incompletePhone": "062193",
+      "invalidEmail": "jean.dupont3@example.c",
+      "incompleteEmail": "jean.dupon@"
+    },
+    "comment": "Commentaire pour Corse ici"
+  },
+  "functions": [
+    "Coordinateur",
+    "Directeur",
+    "Chef de service",
+    "Responsable",
+    "Assistant"
+  ]
+}
