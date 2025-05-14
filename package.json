@@ -4,27 +4,24 @@
   "description": "Tests automatisés avec Cypress et Allure Report",
   "main": "index.js",
   "devDependencies": {
+    "allure-commandline": "^2.24.0",
     "allure-cypress": "^3.2.1",
     "cypress": "^14.3.1",
-    "cypress-plugin-stripe-elements": "^1.0.2",
-    "allure-commandline": "^2.24.0"
+    "cypress-plugin-stripe-elements": "^1.0.2"
   },
   "scripts": {
-  "cypress:run": "cypress run --env allure=true",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
     "allure:generate": "allure generate allure-results --clean -o allure-report",
     "allure:open": "allure open allure-report",
-  "test": "npm run cypress:run && npm run allure:generate"
-},
-"keywords": [
+    "test": "npm run cypress:run && npm run allure:generate"
+  },
+  "keywords": [
     "cypress",
     "testing",
     "automation",
     "allure"
   ],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "cypress": "^13.3.0",
-    "@shelex/cypress-allure-plugin": "^2.40.0"
-  }
+  "license": "ISC"
 }
