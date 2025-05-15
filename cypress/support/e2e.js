@@ -26,10 +26,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
     }
   })
 
-// Ajout d'une commande personnalisée pour allure
-Cypress.Commands.add('allure', () => {
-  return allure;
-});  
+ 
   
 // Logs avant et après chaque test pour mieux identifier les problèmes dans les rapports
 beforeEach(() => {
