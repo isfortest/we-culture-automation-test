@@ -1,1 +1,1 @@
-[]
+[{"values":["https://we-culture.sandboxccas.com"],"name":"Environment"},{"values":["Chrome"],"name":"Browser"},{"values":["Ubuntu-latest"],"name":"Platform"},{"values":["1280"],"name":"Viewport Width"},{"values":["800"],"name":"Viewport Height"},{"values":["v18.20.8"],"name":"Node Version"},{"values":["14.3.1"],"name":"Cypress Version"}]
