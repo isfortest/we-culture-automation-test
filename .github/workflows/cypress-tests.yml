@@ -13,6 +13,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      # Récupérer l'historique précédent depuis gh-pages
+      - name: Download history
+        uses: actions/checkout@v3
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+      
+      # Préparer les dossiers pour l'historique
+      - name: Create history directory
+        if: always()
+        run: |
+          mkdir -p allure-results/history
+          mkdir -p allure-history
+      
+      # Copier l'historique précédent s'il existe
+      - name: Copy history from gh-pages
+        if: always()
+        continue-on-error: true
+        run: |
+          if [ -d gh-pages/history ]; then
+            cp -R gh-pages/history/* allure-results/history/
+          fi
       
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -59,6 +84,12 @@ jobs:
           github_run_num: ${{ github.run_number }}
           github_run_id: ${{ github.run_id }}
           allure_generate_args: '--clean'
+
+      # Copier l'historique pour le conserver
+      - name: Store history
+        if: always()
+        run: |
+          cp -R allure-history/history allure-report/
       
       - name: Upload Allure report as artifact
         uses: actions/upload-artifact@v4
@@ -75,4 +106,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./allure-report
           publish_branch: gh-pages
-          force_orphan: true
+          force_orphan: false

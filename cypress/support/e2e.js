@@ -14,8 +14,8 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import "allure-cypress";
 import './commands';
+import "allure-cypress";
 import 'cypress-plugin-stripe-elements';
 Cypress.on('uncaught:exception', (err, runnable) => {
     // Ignore les erreurs WebSocket spécifiques
@@ -24,6 +24,23 @@ Cypress.on('uncaught:exception', (err, runnable) => {
     }
   })
   
+// Logs avant et après chaque test pour mieux identifier les problèmes dans les rapports
+beforeEach(() => {
+  const testInfo = Cypress.currentTest;
+  cy.allure().startStep(`Démarrage du test: ${testInfo.title}`);
+  cy.log(`Démarrage: ${testInfo.title}`);
+});
+
+afterEach(() => {
+  const testInfo = Cypress.currentTest;
+  cy.log(`Fin: ${testInfo.title}`);
+  cy.allure().endStep();
+  
+  // Capture d'écran en cas d'échec pour l'ajouter au rapport Allure
+  if (testInfo.state === 'failed') {
+    cy.screenshot(`failed-${testInfo.title.replace(/\s+/g, '-').toLowerCase()}`);
+  }
+});
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

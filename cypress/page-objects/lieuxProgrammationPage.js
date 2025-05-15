@@ -102,6 +102,41 @@ class LieuxProgrammationPage {
     getViewButton(rowIndex) {
       return this.getTableRows().eq(rowIndex).find('[aria-label="Voir"], button:has(svg[data-testid="VisibilityIcon"])');
     }
+
+    // Méthode pour obtenir le dropdown de téléchargement
+    getDownloadDropdown() {
+      return cy.get('.MuiPopover-paper');
+    }
+
+    // Méthode pour obtenir une option de format spécifique dans le dropdown
+    getFormatOption(formatName) {
+      return this.getDownloadDropdown().find('.MuiMenuItem-root').contains(formatName);
+    }
+
+    // Méthode pour cliquer sur l'option PDF
+    clickPdfFormat() {
+      this.getDownloadButton().click();
+      this.getFormatOption('Format PDF').click();
+    }
+
+    // Méthode pour cliquer sur l'option Excel
+    clickExcelFormat() {
+      this.getDownloadButton().click();
+      this.getFormatOption('Format Excel').click();
+    }
+
+    // Méthode pour vérifier si un fichier a été téléchargé (à utiliser avec l'interception)
+    verifyFileDownloaded(alias, fileType) {
+      return cy.wait(alias).then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        if (fileType === 'pdf') {
+          expect(interception.response.headers['content-type']).to.include('application/pdf');
+        } else if (fileType === 'excel') {
+          expect(interception.response.headers['content-type']).to.include('spreadsheet');
+        }
+        expect(interception.response.headers['content-disposition']).to.include('attachment');
+      });
+    }
   
     getDeleteButton(rowIndex) {
       return this.getTableRows().eq(rowIndex).find('[aria-label="Supprimer"], button:has(svg[data-testid="DeleteIcon"])');

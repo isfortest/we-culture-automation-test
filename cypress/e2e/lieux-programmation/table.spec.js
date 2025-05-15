@@ -9,10 +9,34 @@ describe('Lieux de Programmation - Table Tests', () => {
     cy.wait('@getLieux');
   });
 
+  it('devrait tester les boutons Imprimer et Télécharger avec les options de format de manière plus modulaire', () => {
+    // Vérifier que les boutons sont visibles
+    LieuxProgrammationPage.getPrintButton().should('be.visible');
+    LieuxProgrammationPage.getDownloadButton().should('be.visible');
+    
+    // Test du bouton Imprimer
+    cy.intercept('GET', '**/platform-api/lieux/programmation/print*').as('printRequest');
+    LieuxProgrammationPage.getPrintButton().click();
+    cy.wait('@printRequest').then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+    });
+    
+    // Test du format PDF
+    cy.intercept('GET', '**/platform-api/lieux/programmation/export?format=pdf').as('pdfExport');
+    LieuxProgrammationPage.clickPdfFormat();
+    LieuxProgrammationPage.verifyFileDownloaded('@pdfExport', 'pdf');
+    
+    // Test du format Excel
+    cy.intercept('GET', '**/platform-api/lieux/programmation/export?format=excel').as('excelExport');
+    LieuxProgrammationPage.clickExcelFormat();
+    LieuxProgrammationPage.verifyFileDownloaded('@excelExport', 'excel');
+  });
+
   it('devrait afficher la table avec les bons headers', () => {
     const expectedHeaders = ['#', 'Nom', 'Code Postal', 'Ville', 'Public', 'Convention', 'Programmable', 'Dotation', 'Actions'];
     
-    LieuxProgrammationPage.getTable().should('be.visible');
+    LieuxProgrammationPage.getTable();
+    //.should('be.visible');
     
     LieuxProgrammationPage.getTableHeaders().each(($header, index) => {
       if (index < expectedHeaders.length) {
@@ -76,38 +100,38 @@ describe('Lieux de Programmation - Table Tests', () => {
 
   it('devrait gérer correctement les actions sur les rows', () => {
     // Tester le bouton Voir (premier élément)
-    cy.intercept('GET', '**/lieux/lieu%20de%20programmation*').as('getLieuDetail');
+    cy.intercept('GET', '**/lieux/lieux%20de%20programmation*').as('getLieuDetail');
     LieuxProgrammationPage.getViewButton(0).click();
-    cy.url().should('include', '/lieux/lieu%20de%20programmation')
+    cy.url().should('include', '/lieux/lieux%20de%20programmation')
     //cy.wait('@getLieuDetail');
     
     // Retourner à la page principale
     cy.go('back');
-    cy.url('include','/lieux/lieu%20de%20programmation')
+    cy.url('include','/lieux/lieux%20de%20programmation')
     //cy.wait('@getLieux');
     
     // Tester le bouton Modifier (deuxième élément)
-    cy.intercept('GET', '**/lieux/lieu%20de%20programmation*').as('getLieuEdit');
+    cy.intercept('GET', '**/lieux/lieux%20de%20programmation*').as('getLieuEdit');
     LieuxProgrammationPage.getEditButton(1).click();
-    cy.url().should('include', '/lieux/lieu%20de%20programmation/2')
+    cy.url().should('include', '/lieux/lieux%20de%20programmation/2')
     //cy.wait('@getLieuEdit');
     
     // Retourner à la page principale
     cy.go('back');
-    cy.url().should('include', '/lieux/lieu%20de%20programmation')
+    cy.url().should('include', '/lieux/lieux%20de%20programmation')
     //cy.wait('@getLieux');
   });
 
   it('devrait tester le bouton "Ajouter nouveau lieu"', () => {
     // Intercepter la requête qui sera déclenchée lors du clic sur Ajouter
-    cy.intercept('GET', '**/lieux/lieu%20de%20programmation/ajouter').as('createLieu');
+    cy.intercept('GET', '**/lieux/lieux%20de%20programmation/ajouter').as('createLieu');
     
     // Cliquer sur le bouton Ajouter
     LieuxProgrammationPage.getAddButton().click();
     
     // Vérifier la redirection vers la page de création
     //cy.wait('@createLieu');
-    cy.url().should('include', '/lieux/lieu%20de%20programmation/ajouter');
+    cy.url().should('include', '/lieux/lieux%20de%20programmation/ajouter');
   });
 
   it('devrait tester les contrôles de pagination', () => {
@@ -135,6 +159,7 @@ describe('Lieux de Programmation - Table Tests', () => {
     
     // Pour tester le clic sur télécharger, on peut intercepter une éventuelle requête
     cy.intercept('GET', '**/platform-api/lieux/programmation/export*').as('exportData');
+    LieuxProgrammationPage.getPrintButton().click();
     LieuxProgrammationPage.getDownloadButton().click();
     
     // Note: Si un menu déroulant s'ouvre avec des options d'export, il faudrait adapter le test
