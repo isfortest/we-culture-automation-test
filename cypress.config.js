@@ -5,6 +5,7 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       allureCypress(on, config, {
         resultsDir: 'allure-results',
+        reportDir: 'allure-report', // ligne pour spécifier le dossier de rapport
         environmentInfo: {
           Environment: 'https://we-culture.sandboxccas.com',
           Browser: 'Chrome',
@@ -14,6 +15,30 @@ module.exports = defineConfig({
           'Node Version': process.version,
           'Cypress Version': require('cypress/package.json').version
         }
+      });
+
+      // Important: Gérer les attachements
+      on('after:screenshot', (details) => {
+        // Logique pour attacher les captures d'écran au rapport Allure
+        const fs = require('fs');
+        const path = require('path');
+        // Copier la capture d'écran vers le dossier de résultats Allure
+        const allureResultsPath = path.join(process.cwd(), 'allure-results');
+        const screenshotFileName = path.basename(details.path);
+        const allureScreenshotPath = path.join(allureResultsPath, screenshotFileName);
+        
+        if (!fs.existsSync(allureResultsPath)) {
+          fs.mkdirSync(allureResultsPath, { recursive: true });
+        }
+        
+        try {
+          fs.copyFileSync(details.path, allureScreenshotPath);
+          console.log(`Screenshot copied to ${allureScreenshotPath}`);
+        } catch (error) {
+          console.error('Error copying screenshot:', error);
+        }
+        
+        return details;
       });
 
       // Ajout d'une tâche pour vérifier les résultats Allure avant la génération du rapport

@@ -47,7 +47,8 @@ jobs:
       
       - name: Install dependencies
         run: |
-          npm install 
+          npm install
+          npm install --save-dev allure-cypress allure-commandline
           npx cypress verify
       
       - name: Cache Cypress binary
@@ -57,9 +58,22 @@ jobs:
           key: cypress-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             cypress-${{ runner.os }}-
-
-      - name: Verify Cypress
-        run: npx cypress verify
+      
+      # Vérifier les permissions et créer les dossiers nécessaires
+      - name: Set directory permissions
+        run: |
+          mkdir -p allure-report allure-results
+          chmod -R 777 allure-report allure-results
+      
+      # Vérifier que le plugin allure-cypress est correctement installé
+      - name: Verify allure-cypress installation
+        run: |
+          if [ -d "node_modules/allure-cypress" ]; then
+            echo "allure-cypress est correctement installé"
+          else
+            echo "allure-cypress n'est pas installé, installation en cours..."
+            npm install --save-dev allure-cypress
+          fi
         
       - name: Run Cypress tests
         run: npm run cypress:run
@@ -85,11 +99,10 @@ jobs:
           github_run_id: ${{ github.run_id }}
           allure_generate_args: '--clean'
 
-      # Copier l'historique pour le conserver
-      - name: Store history
+      # Copier l'historique pour assurer la continuité des rapports
+      - name: Handle Allure history
         if: always()
-        run: |
-          cp -R allure-history/history allure-report/
+        run: npm run allure:history
       
       - name: Upload Allure report as artifact
         uses: actions/upload-artifact@v4

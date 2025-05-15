@@ -17,12 +17,19 @@
 import './commands';
 import "allure-cypress";
 import 'cypress-plugin-stripe-elements';
+
+// Gestion des exceptions non capturées
 Cypress.on('uncaught:exception', (err, runnable) => {
     // Ignore les erreurs WebSocket spécifiques
     if (err.message.includes('WebSocket closed without opened')) {
       return false // on empêche le test d’échouer
     }
   })
+
+// Ajout d'une commande personnalisée pour allure
+Cypress.Commands.add('allure', () => {
+  return allure;
+});  
   
 // Logs avant et après chaque test pour mieux identifier les problèmes dans les rapports
 beforeEach(() => {
