@@ -22,23 +22,7 @@ jobs:
         with:
           ref: gh-pages
           path: gh-pages
-      
-      # Préparer les dossiers pour l'historique
-      - name: Create history directory
-        if: always()
-        run: |
-          mkdir -p allure-results/history
-          mkdir -p allure-history
-      
-      # Copier l'historique précédent s'il existe
-      - name: Copy history from gh-pages
-        if: always()
-        continue-on-error: true
-        run: |
-          if [ -d gh-pages/history ]; then
-            cp -R gh-pages/history/* allure-results/history/
-          fi
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -58,6 +42,22 @@ jobs:
           key: cypress-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             cypress-${{ runner.os }}-
+      
+      # Préparer les dossiers pour l'historique
+      - name: Create history directory
+        if: always()
+        run: |
+          mkdir -p allure-results/history
+          mkdir -p allure-history
+      
+      # Copier l'historique précédent s'il existe
+      - name: Copy history from gh-pages
+        if: always()
+        continue-on-error: true
+        run: |
+          if [ -d gh-pages/history ]; then
+            cp -R gh-pages/history/* allure-results/history/
+          fi
       
       # Vérifier les permissions et créer les dossiers nécessaires
       - name: Set directory permissions
