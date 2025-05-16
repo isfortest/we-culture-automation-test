@@ -63,5 +63,6 @@ module.exports = defineConfig({
     chromeWebSecurity: false,
     failOnStatusCode: false,
     modifyObstructiveCode: false
-  }
+  },
+  video: true,
 })
