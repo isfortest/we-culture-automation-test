@@ -43,18 +43,49 @@ jobs:
           restore-keys: |
             cypress-${{ runner.os }}-
       
-      # Préparer correctement la structure pour l'historique Allure
-      - name: Prepare Allure history
+      # Préparer les dossiers pour l'historique
+      - name: Create history directory
         if: always()
         run: |
           mkdir -p allure-results/history
-          if [ -d "gh-pages/history" ]; then
+          mkdir -p allure-history
+      
+      # Copier l'historique précédent s'il existe
+      - name: Copy history from gh-pages
+        if: always()
+        continue-on-error: true
+        run: |
+          if [ -d gh-pages/history ]; then
             cp -R gh-pages/history/* allure-results/history/
           fi
       
+      # Vérifier les permissions et créer les dossiers nécessaires
+      - name: Set directory permissions
+        run: |
+          mkdir -p allure-report allure-results
+          chmod -R 777 allure-report allure-results
+      
+      # Vérifier que le plugin allure-cypress est correctement installé
+      - name: Verify allure-cypress installation
+        run: |
+          if [ -d "node_modules/allure-cypress" ]; then
+            echo "allure-cypress est correctement installé"
+          else
+            echo "allure-cypress n'est pas installé, installation en cours..."
+            npm install --save-dev allure-cypress
+          fi
+        
       - name: Run Cypress tests
         run: npm run cypress:run
         continue-on-error: true  # Continuer même si les tests échouent
+      
+      - name: Get Allure history
+        uses: actions/checkout@v3
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
       
       - name: Generate Allure Report
         if: always()
@@ -62,19 +93,16 @@ jobs:
         with:
           allure_results: allure-results
           allure_report: allure-report
-          # Assurez-vous que cela pointe vers le bon dossier pour l'historique
           allure_history: allure-history
           keep_reports: 20
           github_run_num: ${{ github.run_number }}
           github_run_id: ${{ github.run_id }}
           allure_generate_args: '--clean'
-      
-      # Copier l'historique généré vers le dossier approprié pour la publication
-      - name: Copy history for next run
+
+      # Copier l'historique pour assurer la continuité des rapports
+      - name: Handle Allure history
         if: always()
-        run: |
-          mkdir -p allure-history/history
-          cp -R allure-report/history/* allure-history/history/
+        run: npm run allure:history
       
       - name: Upload Allure report as artifact
         uses: actions/upload-artifact@v4
@@ -84,13 +112,11 @@ jobs:
           path: allure-report/
           retention-days: 30
       
-      # Déployer sur GitHub Pages avec une structure correcte
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: always() && github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./allure-report
-          destination_dir: .
           publish_branch: gh-pages
-          force_orphan: false  # Garantit que l'historique de la branche gh-pages est préservé
+          force_orphan: false
