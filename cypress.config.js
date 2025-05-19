@@ -6,6 +6,7 @@ module.exports = defineConfig({
       allureCypress(on, config, {
         resultsDir: 'allure-results',
         reportDir: 'allure-report', // ligne pour spécifier le dossier de rapport
+        reportName: 'SI CEPS',
         environmentInfo: {
           Environment: 'https://we-culture.sandboxccas.com',
           Browser: 'Chrome',
