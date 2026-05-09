@@ -44,7 +44,7 @@ class LieuxProgrammationPage {
     }
   
     getFilterCountText() {
-      return cy.contains('lieux de programmation :');
+      return cy.contains(/Nombre de lieux de programmation\s*:/);
     }
   
     // Table section
@@ -53,10 +53,10 @@ class LieuxProgrammationPage {
     }
   
     getColumnFilterButton() {
-      return cy.get('.MuiSelect-select.MuiSelect-outlined');
+      return cy.get('[role="combobox"], .MuiSelect-select').filter(':visible').last();
     }
     getListColumnFilter() {
-        return cy.get('.css-1toxriw-MuiList-root-MuiMenu-list');
+        return cy.get('[role="listbox"], [role="menu"], .MuiMenu-list');
       }
   
     openColumnFilter() {
@@ -69,7 +69,7 @@ class LieuxProgrammationPage {
     }
   
     getSearchInput() {
-      return cy.get('.css-1p7u3rb-MuiInputBase-input-MuiOutlinedInput-input');
+      return cy.get('input[type="text"]').filter(':visible').last();
     }
   
     search(term) {
@@ -79,11 +79,11 @@ class LieuxProgrammationPage {
     }
   
     getPrintButton() {
-      return cy.contains('Imprimer');
+      return cy.contains('button', /Imprimer/i).scrollIntoView();
     }
   
     getDownloadButton() {
-      return cy.contains('Télécharger');
+      return cy.contains('button', /Télécharger|Telecharger/i).scrollIntoView();
     }
   
     getTable() {
@@ -148,11 +148,11 @@ class LieuxProgrammationPage {
   
     // Pagination
     getPaginationInfo() {
-      return cy.contains(/\d+-\d+ sur \d+/);
+      return cy.contains(/Affichant\s+\d+\s+à\s+\d+\s+de\s+\d+\s+lignes|\d+\s*-\s*\d+\s+sur\s+\d+/);
     }
   
     getRowsPerPageSelect() {
-      return cy.get('.css-tdf12q-MuiInputBase-root-MuiTablePagination-select');
+      return cy.contains('Afficher').parent().find('[role="combobox"]').first();
     }
   
     changeRowsPerPage(number) {

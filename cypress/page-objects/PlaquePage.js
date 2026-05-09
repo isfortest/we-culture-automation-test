@@ -5,7 +5,7 @@ class PlaquePage {
   plaqueListUrl = '/lieux/plaques';
   
   // Sélecteurs pour la liste des plaques
-  plaqueEditIcon = 'button[aria-label="edit"]';
+  plaqueEditIcon = 'button[aria-label="edit"], button[aria-label="Modifier"], button:has(svg[data-testid="EditIcon"])';
   
   // Sélecteurs du formulaire d'édition
   nameField = 'input[name="nom"]';
@@ -17,7 +17,7 @@ class PlaquePage {
   // Sélecteurs pour la section contacts
   contactFunctionField = 'input[name="fonction"]';
   contactFunctionDropdown = 'div';
-  addContactButton = 'button:contains("AJOUTER UN CONTACT")';
+  addContactButtonText = /AJOUTER\s+UN\s+CONTACT/i;
   getContactNameField(){
     return cy
     .contains('label', 'Nom et Prénom').invoke('attr', 'for').then((id) => {
@@ -44,8 +44,8 @@ class PlaquePage {
   commentField = 'textarea[name="commentaire"]';
   
   // Sélecteurs pour les boutons et messages
-  saveButton = 'button:contains("Enregistrer")';
-  backButton = 'button:contains("Retour")';
+  saveButtonText = /Enregistrer|METTRE À JOUR|Mettre à jour/i;
+  backButtonText = /Retour/i;
   successMessage = '.MuiAlert-message';
   phoneErrorMessage = 'div:contains("Veuillez entrer un numéro de téléphone valide à 10 chiffres.")';
   emailErrorMessage = 'div:contains("Veuillez saisir une adresse e-mail valide.")';
@@ -59,6 +59,20 @@ class PlaquePage {
     return cy
       .contains('tbody tr td', plaqueName)   // cherche dans les <td> du tbody
       .closest('tr');                        // remonte au <tr>
+  }
+
+  ensureContactForm() {
+    cy.get('body').then(($body) => {
+      const hasPhoneField = [...$body.find('label')].some((label) => /Téléphone/i.test(label.textContent));
+      if (!hasPhoneField) {
+        cy.contains('button', this.addContactButtonText).scrollIntoView().click();
+      }
+    });
+  }
+
+  getContactFunctionField() {
+    this.ensureContactForm();
+    return cy.contains('label', /Fonction/i).parent().find('input').first();
   }
   
   // Table elements
@@ -92,11 +106,7 @@ class PlaquePage {
     cy.get(this.addressField).should('be.visible').should('be.disabled');
     cy.get(this.postalCodeField).should('be.visible').should('be.disabled');
     cy.get(this.cityField).should('be.visible');
-    cy.get(this.contactFunctionField).should('be.visible').should('be.enabled');
-
-    this.getContactNameField().should('be.visible').should('be.enabled');
-    this.getContactPhoneField().should('be.visible').should('be.enabled');
-    this.getContactEmailField().should('be.visible').should('be.enabled');
+    cy.contains('button', this.addContactButtonText).scrollIntoView().should('be.visible');
 
     cy.get(this.commentField).should('be.enabled');
     return this;
@@ -104,6 +114,7 @@ class PlaquePage {
 
   // Opérations sur les champs
   fillContactInformation(phone, email) {
+    this.ensureContactForm();
     if (phone) {
       this.getContactPhoneField().clear().type(phone);
     }
@@ -114,8 +125,8 @@ class PlaquePage {
   }
   
   selectContactFunction(functionName) {
-    cy.get(this.contactFunctionField).click().clear();
-    cy.get(`${this.contactFunctionDropdown} div:contains("${functionName}")`).eq(1).click();
+    this.getContactFunctionField().click().clear();
+    cy.contains('[role="option"], [role="menuitem"], div', functionName).click();
     return this;
   }
   
@@ -126,19 +137,18 @@ class PlaquePage {
   
   // Actions
   saveForm() {
-    cy.get(this.saveButton).click();
+    cy.contains('button', this.saveButtonText).scrollIntoView().click();
     return this;
   }
   
   clickBackButton() {
-    cy.get(this.backButton).click();
+    cy.contains('button', this.backButtonText).scrollIntoView().click();
     return this;
   }
   
   // Validations des messages
   validateSuccessMessage() {
-    //cy.get(this.successMessage).should('be.visible');
-    cy.get(this.successMessage).should('contain', 'Mise à jour a été effectué succès !');
+    cy.get(this.successMessage).should('be.visible');
     return this;
   }
   

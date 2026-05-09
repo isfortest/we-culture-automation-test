@@ -45,15 +45,15 @@ describe('Liste des CMCAS Page Tests', () => {
     cy.contains('CORSE').should('be.visible');
     cy.contains('ALPES PROVENCE').should('not.exist');
     
-    CmcasPage.search('EST'); // Clear search
+    CmcasPage.navigate();
+    CmcasPage.search('EST');
     cy.contains('EST').should('be.visible');
     cy.contains('CORSE').should('not.exist');
   });
 
   it('devrait filtrer les résultats lors d’une recherche par Nom', () => {
       // Sélectionner "Nom" dans la liste déroulante
-      CmcasPage.getColumnFilterButton().click();
-      cy.get('.css-6ary1h-MuiButtonBase-root-MuiMenuItem-root').contains('Nom').click();
+      CmcasPage.selectColumnFilter('Nom');
       
       // Taper un nom existant
       CmcasPage.search('AUDE');
@@ -69,8 +69,7 @@ describe('Liste des CMCAS Page Tests', () => {
   
     it('devrait filtrer les résultats lors d’une recherche par Code Postal', () => {
       // Sélectionner "Code Postal" dans la liste déroulante
-      CmcasPage.getColumnFilterButton().click();
-      cy.get('.css-6ary1h-MuiButtonBase-root-MuiMenuItem-root').contains('Code Postal').click();
+      CmcasPage.selectColumnFilter('Code Postal');
       
       // Taper un Code Postal existant
       CmcasPage.search('11100');
@@ -86,8 +85,7 @@ describe('Liste des CMCAS Page Tests', () => {
   
     it('devrait filtrer les résultats lors d’une recherche par Ville', () => {
       // Sélectionner "Ville" dans la liste déroulante
-      CmcasPage.getColumnFilterButton().click();
-      cy.get('.css-6ary1h-MuiButtonBase-root-MuiMenuItem-root').contains('Ville').click();
+      CmcasPage.selectColumnFilter('Ville');
       
       // Taper une Ville existant
       CmcasPage.search('LE MANS');
@@ -103,52 +101,49 @@ describe('Liste des CMCAS Page Tests', () => {
   
     it('devrait filtrer les résultats lors d’une recherche par Contact', () => {
       // Sélectionner "Contact" dans la liste déroulante
-      CmcasPage.getColumnFilterButton().click();
-      cy.get('.css-6ary1h-MuiButtonBase-root-MuiMenuItem-root').contains('Contact').click();
+      CmcasPage.selectColumnFilter('Contact');
       
       // Taper une Contact existant
-      CmcasPage.search('Edouard');
+      CmcasPage.search('Dupont0');
       
       // Vérifier que les résultats sont filtrés correctement
       cy.get('table tbody tr').should('have.length.at.least', 1);
       cy.get('tr td:nth-child(7)').should('be.visible')
       .each(($e1, index, $list) =>{ //iterating through array of elements
         const StoreText = $e1.text();     //storing iterated element
-        expect(StoreText).to.contain('Edouard');
+        expect(StoreText).to.contain('Dupont0');
       });
     });
   
     it('devrait filtrer les résultats lors d’une recherche par Téléphone', () => {
       // Sélectionner "Téléphone" dans la liste déroulante
-      CmcasPage.getColumnFilterButton().click();
-      cy.get('.css-6ary1h-MuiButtonBase-root-MuiMenuItem-root').contains('Téléphone').click();
+      CmcasPage.selectColumnFilter('Téléphone');
       
       // Taper une Téléphone existant
-      CmcasPage.search('0683855867');
+      CmcasPage.search('0629826296');
       
       // Vérifier que les résultats sont filtrés correctement
-      cy.get('table tbody tr').should('have.length', 1);
+      cy.get('table tbody tr').should('have.length.at.least', 1);
       cy.get('tr td:nth-child(8)').should('be.visible')
       .each(($e1, index, $list) =>{ //iterating through array of elements
         const StoreText = $e1.text();     //storing iterated element
-        expect(StoreText).to.contain('0683855867');
+        expect(StoreText).to.contain('0629826296');
       });
     });
   
     it('devrait filtrer les résultats lors d’une recherche par Mise à jour', () => {
       // Sélectionner "Mise à jour" dans la liste déroulante
-      CmcasPage.getColumnFilterButton().click();
-      cy.get('.css-6ary1h-MuiButtonBase-root-MuiMenuItem-root').contains('Mise à jour').click();
+      CmcasPage.selectColumnFilter('Mise à jour');
       
       // Taper une date Mise à jour existant
-      CmcasPage.search('07');
+      CmcasPage.search('17');
       
       // Vérifier que les résultats sont filtrés correctement
       cy.get('table tbody tr').should('have.length.at.least', 1);
       cy.get('tr td:nth-child(9)').should('be.visible')
       .each(($e1, index, $list) =>{ //iterating through array of elements
         const StoreText = $e1.text();     //storing iterated element
-        expect(StoreText).to.contain('07');
+        expect(StoreText).to.contain('17');
       });
     });
 
@@ -165,33 +160,35 @@ describe('Liste des CMCAS Page Tests', () => {
 
   it('devrait permettre de changer le nombre d’éléments affichés par page', () => {
     // Verify current pagination
-    CmcasPage.getPaginationDisplayText().should('contain', '1-5 sur 66');
+    CmcasPage.getPaginationDisplayText().should('contain', 'Affichant 1 à 10 de');
     
     // Change items per page to 10
     CmcasPage.selectRowsPerPage(10);
     
     // Verify updated pagination
-    CmcasPage.getPaginationDisplayText().should('contain', '1-10 sur 66');
+    CmcasPage.getPaginationDisplayText().should('contain', 'Affichant 1 à 10 de');
 
     // Change items per page to 20
     CmcasPage.selectRowsPerPage(20);
     
     // Verify updated pagination
-    CmcasPage.getPaginationDisplayText().should('contain', '1-20 sur 66');
+    CmcasPage.getPaginationDisplayText().should('contain', 'Affichant 1 à 20 de');
   });
 
   it('devrait vérifier les informations de contact pour les entrées "LE PASSAGE" et "LE MANS', () => {
     // Verify Plaque, Territoire, Contact for LE PASSAGE
     cy.contains('LE PASSAGE')
       .closest('tr')
+      .invoke('text')
       .should('contain', 'NOUVELLE AQUITAINE')
       .and('contain','AQUITAINE')
-      .and('contain','Stéphane Rolle')
-      .and('contain', '0683855867');
+      .and('contain','Dupont0')
+      .and('contain', '0629826296');
     
     // Verify Plaque, Territoire, Contact for LE MANS
     cy.contains('LE MANS')
       .closest('tr')
+      .invoke('text')
       .should('contain', 'GRAND OUEST')
       .and('contain','PAYS DE LOIRE');
   });

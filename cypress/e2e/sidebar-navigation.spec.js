@@ -79,7 +79,7 @@ describe('Navigation via sidebar', () => {
       cy.contains('Lieux de Programmation').click();
       
       // Verify we are on the Programmation page
-      cy.url().should('include', '/lieux/programmation');
+      cy.url().should('include', '/lieux/lieux%20de%20programmation');
       cy.get('.MuiBreadcrumbs-ol').should('have.text','Accueil/Lieux/Programmation');
       cy.contains('Retour').should('be.visible');
       cy.contains('Lieux de programmation').should('be.visible');
@@ -114,7 +114,7 @@ describe('Navigation via sidebar', () => {
       cy.contains('Activités').click();
       
       // Click on the Interventions sub-menu item
-      cy.contains('Interventions').click();
+      cy.get('[href="/interventions"]').click();
       
       // Verify we are on the Interventions page
       cy.url().should('include', '/interventions');

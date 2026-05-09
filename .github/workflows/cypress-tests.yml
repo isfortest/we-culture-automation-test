@@ -2,21 +2,24 @@ name: Cypress Tests with Allure Report
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:  # Permet de lancer le workflow manuellement
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
 
-      # Récupérer l'historique précédent depuis gh-pages
-      - name: Download history
-        uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout gh-pages history
+        uses: actions/checkout@v4
         if: always()
         continue-on-error: true
         with:
@@ -24,99 +27,59 @@ jobs:
           path: gh-pages
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: |
-          npm install
-          npm install --save-dev allure-cypress allure-commandline
-          npx cypress verify
-      
-      - name: Cache Cypress binary
-        uses: actions/cache@v3
+          node-version: 20
+          cache: npm
+
+      - name: Restore Cypress binary cache
+        uses: actions/cache@v4
         with:
           path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             cypress-${{ runner.os }}-
-      
-      # Préparer les dossiers pour l'historique
-      - name: Create history directory
-        if: always()
-        run: |
-          mkdir -p allure-results/history
-          mkdir -p allure-history
-      
-      # Copier l'historique précédent s'il existe
-      - name: Copy history from gh-pages
-        if: always()
-        continue-on-error: true
-        run: |
-          if [ -d gh-pages/history ]; then
-            cp -R gh-pages/history/* allure-results/history/
-          fi
-      
-      # Vérifier les permissions et créer les dossiers nécessaires
-      - name: Set directory permissions
-        run: |
-          mkdir -p allure-report allure-results
-          chmod -R 777 allure-report allure-results
-      
-      # Vérifier que le plugin allure-cypress est correctement installé
-      - name: Verify allure-cypress installation
-        run: |
-          if [ -d "node_modules/allure-cypress" ]; then
-            echo "allure-cypress est correctement installé"
-          else
-            echo "allure-cypress n'est pas installé, installation en cours..."
-            npm install --save-dev allure-cypress
-          fi
-        
-      - name: Run Cypress tests
-        run: npm run cypress:run
-        continue-on-error: true  # Continuer même si les tests échouent
-      
-      - name: Get Allure history
-        uses: actions/checkout@v3
-        if: always()
-        continue-on-error: true
-        with:
-          ref: gh-pages
-          path: gh-pages
-      
-      - name: Generate Allure Report
-        if: always()
-        uses: simple-elf/allure-report-action@master
-        with:
-          allure_results: allure-results
-          allure_report: allure-report
-          allure_history: allure-history
-          keep_reports: 20
-          github_run_num: ${{ github.run_number }}
-          github_run_id: ${{ github.run_id }}
-          allure_generate_args: '--clean'
 
-      # Copier l'historique pour assurer la continuité des rapports
-      - name: Handle Allure history
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Cypress binary
+        run: npx cypress verify
+
+      - name: Prepare Allure history
         if: always()
-        run: npm run allure:history
-      
-      - name: Upload Allure report as artifact
+        run: |
+          mkdir -p allure-results
+          if [ -d gh-pages/history ]; then
+            cp -R gh-pages/history allure-results/history
+          fi
+
+      - name: Run Cypress tests in Chrome
+        id: cypress
+        continue-on-error: true
+        run: npx cypress run --browser chrome
+
+      - name: Generate Allure HTML report
+        id: allure
+        if: always()
+        run: npx allure generate allure-results --clean -o allure-report
+
+      - name: Upload Allure report artifact
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.allure.outcome == 'success'
         with:
           name: allure-report
           path: allure-report/
           retention-days: 30
-      
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: always() && github.ref == 'refs/heads/main'
+
+      - name: Deploy Allure report to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: always() && steps.allure.outcome == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./allure-report
           publish_branch: gh-pages
-          force_orphan: false
+          publish_dir: ./allure-report
+
+      - name: Fail job when Cypress tests failed
+        if: always() && steps.cypress.outcome == 'failure'
+        run: exit 1
