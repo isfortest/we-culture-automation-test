@@ -1,4 +1,4 @@
-import PlaquePage from '/cypress/page-objects/PlaquePage';
+import PlaquePage from '../page-objects/PlaquePage';
 
 describe("Tests du formulaire d'édition des Plaques", () => {
   beforeEach(function() {

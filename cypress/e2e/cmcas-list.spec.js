@@ -1,6 +1,6 @@
 /// <reference types="Cypress" />
 
-import CmcasPage from '/cypress/page-objects/cmcasPage';
+import CmcasPage from '../page-objects/cmcasPage';
 
 describe('Liste des CMCAS Page Tests', () => {
   beforeEach(() => {

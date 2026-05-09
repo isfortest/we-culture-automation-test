@@ -1,6 +1,6 @@
 /// <reference types="Cypress" />
 
-import PlaquesPage from '/cypress/page-objects/plaquesPage';
+import PlaquesPage from '../page-objects/plaquesPage';
 
 describe('Liste des Plaques Page Tests', () => {
   beforeEach(() => {

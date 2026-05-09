@@ -1,6 +1,6 @@
 /// <reference types="Cypress" />
 
-import TerritoiresPage from '/cypress/page-objects/territoiresPage';
+import TerritoiresPage from '../page-objects/territoiresPage';
 
 describe('Liste des Territoires Page Tests', () => {
   beforeEach(() => {

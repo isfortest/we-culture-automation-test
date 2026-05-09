@@ -59,14 +59,23 @@ jobs:
         continue-on-error: true
         run: npx cypress run --browser chrome
 
+      - name: Check Allure results
+        id: allure_results
+        if: always()
+        run: |
+          result_count=$(find allure-results -maxdepth 1 -name '*-result.json' | wc -l)
+          echo "result_count=$result_count" >> "$GITHUB_OUTPUT"
+          echo "Allure result files: $result_count"
+          test "$result_count" -gt 0
+
       - name: Generate Allure HTML report
         id: allure
-        if: always()
+        if: always() && steps.allure_results.outcome == 'success'
         run: npx allure generate allure-results --clean -o allure-report
 
       - name: Upload Allure report artifact
         uses: actions/upload-artifact@v4
-        if: always() && steps.allure.outcome == 'success'
+        if: always() && steps.allure.outcome == 'success' && steps.allure_results.outcome == 'success'
         with:
           name: allure-report
           path: allure-report/
@@ -74,12 +83,12 @@ jobs:
 
       - name: Deploy Allure report to gh-pages
         uses: peaceiris/actions-gh-pages@v4
-        if: always() && steps.allure.outcome == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        if: always() && steps.allure.outcome == 'success' && steps.allure_results.outcome == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./allure-report
 
       - name: Fail job when Cypress tests failed
-        if: always() && steps.cypress.outcome == 'failure'
+        if: always() && (steps.cypress.outcome == 'failure' || steps.allure_results.outcome == 'failure')
         run: exit 1

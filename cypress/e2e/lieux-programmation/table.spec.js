@@ -1,4 +1,4 @@
-import LieuxProgrammationPage from '/cypress/page-objects/lieuxProgrammationPage';
+import LieuxProgrammationPage from '../../page-objects/lieuxProgrammationPage';
 
 describe('Lieux de Programmation - Table Tests', () => {
   beforeEach(() => {
